@@ -1,0 +1,62 @@
+{
+  "total": 25,
+  "passed": 17,
+  "failed": 8,
+  "success_rate": 68.0,
+  "by_category": {
+    "Level 1: Basic Questions": {
+      "total": 12,
+      "passed": 9,
+      "failed": 3
+    },
+    "Level 2: Complex Questions": {
+      "total": 9,
+      "passed": 4,
+      "failed": 5
+    },
+    "Level 3: Visualization Questions": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0
+    }
+  },
+  "results": [
+    {
+      "question": "What is the total sales revenue for the entire dataset?",
+      "expected": 836154,
+      "category": "Level 1: Basic Questions",
+      "query_type": "sum",
+      "passed": false,
+      "actual": 2297200.86,
+      "error": null,
+      "code": "import pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nimport numpy as np\nimport os\n\n# Create the 'outputs' directory if it doesn't exist\nos.makedirs('outputs', exist_ok=True)\n\n# 1. Load the CSV file with encoding handling\ntry:\n    df = pd.read_csv('superstore.csv', encoding='utf-8', on_bad_lines='skip')\nexcept UnicodeDecodeError:\n    try:\n        df = pd.read_csv('superstore.csv', encoding='latin-1', on_bad_lines='skip')\n    except UnicodeDecodeError:\n        df = pd.read_csv('superstore.csv', encoding='utf-8', errors='ignore', on_bad_lines='skip')\n\n# 2. Perform the analysis: Calculate total sales revenue\ntotal_sales_revenue = df['Sales'].sum()\n\n# 3. Create appropriate visualizations\nplt.figure(figsize=(8, 5))\nsns.barplot(x=['Total Sales Revenue'], y=[total_sales_revenue], color='steelblue')\nplt.title('Total Sales Revenue')\nplt.ylabel('Sales Revenue ($)')\nplt.grid(axis='y', linestyle='--', alpha=0.7)\nplt.ticklabel_format(style='plain', axis='y') # Prevent scientific notation on y-axis\nplt.ylim(0, total_sales_revenue * 1.1) # Set y-axis limit to be slightly above the total sales\n\n# Annotate the bar with the total sales value\nplt.text(0, total_sales_revenue + (total_sales_revenue * 0.02), f'${total_sales_revenue:,.2f}',\n         ha='center', va='bottom', fontsize=12)\n\n# 4. Save the visualization\nplt.savefig('outputs/visualization.png', dpi=150, bbox_inches='tight')\nplt.close()\n\n# 5. Print key findings to stdout\nprint(\"Analysis: Total Sales Revenue\")\nprint(\"-\" * 30)\nprint(f\"Total sales revenue for the entire dataset: ${total_sales_revenue:,.2f}\")\nprint(\"\\nVisualization saved to 'outputs/visualization.png'\")",
+      "stdout": "Analysis: Total Sales Revenue\n------------------------------\nTotal sales revenue for the entire dataset: $2,297,200.86\n\nVisualization saved to 'outputs/visualization.png'\n",
+      "stderr": ""
+    },
+    {
+      "question": "What is the average discount applied to all orders?",
+      "expected": 0.156,
+      "category": "Level 1: Basic Questions",
+      "query_type": "discount",
+      "passed": false,
+      "actual": 1.0,
+      "error": null,
+      "code": "import pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nimport numpy as np\nimport os\n\n# Create the outputs directory if it doesn't exist\nos.makedirs('outputs', exist_ok=True)\n\n# Function to load data with encoding handling\ndef load_data(filepath):\n    try:\n        df = pd.read_csv(filepath, encoding='utf-8', on_bad_lines='skip')\n    except UnicodeDecodeError:\n        try:\n            df = pd.read_csv(filepath, encoding='latin-1', on_bad_lines='skip')\n        except UnicodeDecodeError:\n            df = pd.read_csv(filepath, encoding='utf-8', errors='ignore', on_bad_lines='skip')\n    return df\n\n# Load the dataset\ndf = load_data('superstore.csv')\n\n# --- Data Cleaning and Preparation (if necessary) ---\n# Check for missing values in the 'Discount' column\nif df['Discount'].isnull().any():\n    # If there are missing values, decide on a strategy (e.g., fill with median, mean, or drop)\n    # For discount, 0 might be a reasonable fill if missing means no discount was applied.\n    # However, for an average calculation, dropping might be safer if the number of missing is small.\n    # Let's assume for this analysis, we will drop rows with missing discounts if any.\n    initial_rows = df.shape[0]\n    df.dropna(subset=['Discount'], inplace=True)\n    if df.shape[0] < initial_rows:\n        print(f\"Removed {initial_rows - df.shape[0]} rows due to missing 'Discount' values.\")\nelse:\n    print(\"No missing values found in the 'Discount' column.\")\n\n\n# --- Analysis: Calculate the average discount ---\n# The 'Discount' column is already in float format, representing a percentage (e.g., 0.16 for 16%)\naverage_discount = df['Discount'].mean()\naverage_discount_percentage = average_discount * 100\n\n# --- Visualization ---\nplt.figure(figsize=(10, 6))\nsns.histplot(df['Discount'], bins=20, kde=True, color='skyblue')\nplt.axvline(average_discount, color='red', linestyle='--', label=f'Average Discount: {average_discount_percentage:.2f}%')\nplt.title('Distribution of Discount Rates with Average')\nplt.xlabel('Discount Rate')\nplt.ylabel('Number of Orders')\nplt.legend()\nplt.grid(axis='y', linestyle='--', alpha=0.7)\n\n# Save the plot\nplt.savefig('outputs/visualization.png', dpi=150, bbox_inches='tight')\nplt.close()\n\n# --- Print Key Findings ---\nprint(f\"Key Findings:\")\nprint(f\"1. The average discount applied to all orders is {average_discount:.4f}, which is approximately {average_discount_percentage:.2f}%.\")\nprint(f\"2. The distribution of discount rates shows that many orders have no discount (0%), while other common discount rates are around 0.2 and higher.\")\nprint(f\"3. A significant portion of discounts are concentrated at specific values, suggesting structured discount policies.\")\n\n# Also print some general statistics about discounts for more context\nprint(\"\\n--- Discount Statistics ---\")\nprint(df['Discount'].describe().to_string())",
+      "stdout": "No missing values found in the 'Discount' column.\nKey Findings:\n1. The average discount applied to all orders is 0.1562, which is approximately 15.62%.\n2. The distribution of discount rates shows that many orders have no discount (0%), while other common discount rates are around 0.2 and higher.\n3. A significant portion of discounts are concentrated at specific values, suggesting structured discount policies.\n\n--- Discount Statistics ---\ncount    9994.000000\nmean        0.156203\nstd         0.206452\nmin         0.000000\n25%         0.000000\n50%         0.200000\n75%         0.200000\nmax         0.800000\n",
+      "stderr": ""
+    },
+    {
+      "question": "How many unique orders are in the dataset?",
+      "expected": 5009,
+      "category": "Level 1: Basic Questions",
+      "query_type": "count",
+      "passed": true,
+      "actual": 5009.0,
+      "error": null,
+      "code": "import pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nimport os\n\n# Create the 'outputs' directory if it doesn't exist\nos.makedirs('outputs', exist_ok=True)\n\n# Load the CSV file with encoding handling\ntry:\n    df = pd.read_csv('superstore.csv', encoding='utf-8', on_bad_lines='skip')\nexcept UnicodeDecodeError:\n    try:\n        df = pd.read_csv('superstore.csv', encoding='latin-1', on_bad_lines='skip')\n    except UnicodeDecodeError:\n        df = pd.read_csv('superstore.csv', encoding='utf-8', errors='ignore', on_bad_lines='skip')\n\n# Perform the analysis: Count unique orders\nunique_orders = df['Order ID'].nunique()\ntotal_records = len(df)\n\n# Print key findings\nprint(f\"Total number of records in the dataset: {total_records}\")\nprint(f\"Number of unique orders in the dataset: {unique_orders}\")\n\n# Create visualization\n# For a single number, a simple bar chart comparing total records to unique orders\n# can illustrate the concept that one order ID can have multiple line items.\nplot_data = pd.DataFrame({\n    'Metric': ['Total Records', 'Unique Orders'],\n    'Count': [total_records, unique_orders]\n})\n\nplt.figure(figsize=(8, 5))\nsns.barplot(x='Metric', y='Count', data=plot_data, color='steelblue')\nplt.title('Comparison of Total Records and Unique Orders')\nplt.ylabel('Count')\nplt.xlabel('')\nplt.grid(axis='y', linestyle='--', alpha=0.7)\nplt.ticklabel_format(style='plain', axis='y') # Prevent scientific notation for y-axis\n\n# Add text labels on top of bars\nfor index, row in plot_data.iterrows():\n    plt.text(index, row['Count'], f'{row[\"Count\"]:,}', color='black', ha=\"center\", va='bottom')\n\nplt.tight_layout()\n\n# Save the visualization\nplt.savefig('outputs/visualization.png', dpi=150, bbox_inches='tight')\nplt.close()",
+      "stdout": "Total number of records in the dataset: 9994\nNumber of unique orders in the dataset: 5009\n",
+      "stderr": ""
+    },
+    {
+      "question": "What is the total quantity of products sold in the 'East' region?",
+      "expected": 

@@ -114,7 +114,10 @@ IMPORTANT:
 - Save plots with: plt.savefig('outputs/visualization.png', dpi=150, bbox_inches='tight')
 - Always call plt.close() after saving to free memory
 - Print results using print() statements - these will be captured for summary generation
-- For seaborn: When using palette, always assign it to 'hue' parameter or use 'color' instead
+- For seaborn barplot/lineplot/etc: NEVER use palette without hue. Instead:
+  * If you need different colors: use hue parameter (e.g., sns.barplot(x='col1', y='col2', hue='col3', data=df))
+  * If you don't need hue: use color parameter (e.g., sns.barplot(x='col1', y='col2', data=df, color='steelblue'))
+  * Or simply don't specify palette/color and use default colors
 - For pandas Series: Use .to_string() without formatters, or convert to DataFrame first if formatting needed
 - For printing Series with formatting: Use print(series) or convert to DataFrame: print(series.to_frame().to_string())
 - Avoid deprecated pandas/seaborn parameters that cause warnings or errors

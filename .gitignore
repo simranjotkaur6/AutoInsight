@@ -40,6 +40,9 @@ results/
 *.jpg
 *.pdf
 
+# Test reports (generated)
+test_report.json
+
 # IDE
 .vscode/
 .idea/
